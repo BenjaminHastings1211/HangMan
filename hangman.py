@@ -40,6 +40,15 @@ class ScoreTracker():
         self.letterLocations = []
         self.blankSize = None
 
+        self.bodySeg = [
+            [self.origin[0]+80,self.origin[1]+25,self.origin[0]+120,self.origin[1]+65],
+            [self.origin[0]+100,self.origin[1]+65,self.origin[0]+100,self.origin[1]+115],
+            [self.origin[0]+100,self.origin[1]+75,self.origin[0]+80,self.origin[1]+90],
+            [self.origin[0]+100,self.origin[1]+75,self.origin[0]+120,self.origin[1]+90],
+            [self.origin[0]+100,self.origin[1]+115,self.origin[0]+85,self.origin[1]+135],
+            [self.origin[0]+100,self.origin[1]+115,self.origin[0]+115,self.origin[1]+135]
+        ]
+
         self.wrongLetterLabel = canvas.create_text(W/2,H-100,text='',font=('Arial',24))
 
         self.createFrame()
@@ -50,33 +59,24 @@ class ScoreTracker():
         canvas.create_line(self.origin[0]+100,self.origin[1],self.origin[0]+100,self.origin[1]+25,fill='black',width=2)
 
     def drawNext(self):
-        self.timesWrong += 1
 
-        if (self.timesWrong == 1):
-            canvas.create_oval(self.origin[0]+80,self.origin[1]+25,self.origin[0]+120,self.origin[1]+65)
-        elif (self.timesWrong == 2):
-            canvas.create_line(self.origin[0]+100,self.origin[1]+65,self.origin[0]+100,self.origin[1]+115)
-        elif (self.timesWrong == 3):
-            canvas.create_line(self.origin[0]+100,self.origin[1]+75,self.origin[0]+80,self.origin[1]+90)
-        elif (self.timesWrong == 4):
-            canvas.create_line(self.origin[0]+100,self.origin[1]+75,self.origin[0]+120,self.origin[1]+90)
-        elif (self.timesWrong == 5):
-            canvas.create_line(self.origin[0]+100,self.origin[1]+115,self.origin[0]+85,self.origin[1]+135)
-        elif (self.timesWrong == 6):
-            canvas.create_line(self.origin[0]+100,self.origin[1]+115,self.origin[0]+115,self.origin[1]+135)
+        if self.timesWrong == 0:
+            canvas.create_oval(self.bodySeg[0])
+        elif self.timesWrong <= 6:
+            canvas.create_line(self.bodySeg[self.timesWrong])
+        else:
             self.dead = True
+        self.timesWrong += 1
 
     def drawBlanks(self):
         blanks = gameController.currentWord.spaces
-
         space = 50
-
         totalLength = blanks*(space)
         x = W/2 - totalLength/2
-
         spaceSize = (totalLength / blanks) * 0.8
         self.blankSize = spaceSize
         spaceBetween = (totalLength / blanks) - spaceSize
+        
         for i in range(blanks):
             canvas.create_line(x,350,x+spaceSize,350,width=2)
             self.letterLocations.append(x)
@@ -94,7 +94,6 @@ class ScoreTracker():
             finalString += '%s '%letter
 
         canvas.itemconfig(self.wrongLetterLabel,text=finalString)
-
 
 class SecretWord():
     def __init__(self,word):
@@ -139,8 +138,6 @@ canvas.pack()
 gameController = GameController()
 gameController.traker.drawBlanks()
 
-
 root.bind('<Key>',gameController.inputLetter)
-
 
 root.mainloop()
